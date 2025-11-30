@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Chasers Presentation</title>
+    <!-- 使用国内稳定 CDN -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* =========================================
+           1. 核心配色 (与网站一致)
+           ========================================= */
+        :root {
+            --primary: #64a19d;      /* 青绿色 */
+            --secondary: #2c3e50;    /* 深蓝色 */
+            --accent: #a71d2a;       /* 红色 - 警告 */
+            --bg-color: #f8f9fa;     /* 浅灰背景 */
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #333;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; /* 禁止滚动 */
+            font-family: "Helvetica Neue", Helvetica, "Microsoft YaHei", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* =========================================
+           2. 容器逻辑：强制缩放适配
+           ========================================= */
+        #slide-container {
+            width: 1920px;
+            height: 1080px;
+            background-color: var(--bg-color);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            /* 居中定位，JS 会控制 scale */
+            transform-origin: center center;
+        }
+
+        /* 背景装饰 */
+        .bg-gradient {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 90% 10%, rgba(100, 161, 157, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 10% 90%, rgba(44, 62, 80, 0.05) 0%, transparent 40%);
+            z-index: 0;
+        }
+
+        /* =========================================
+           3. 幻灯片内容样式
+           ========================================= */
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            padding: 80px 120px; /* 调整内边距，防止贴边 */
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease;
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: "Georgia", serif;
+            font-size: 6.5rem;
+            color: var(--secondary);
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        h2 {
+            font-family: "Georgia", serif;
+            font-size: 3.8rem;
+            color: var(--secondary);
+            margin-bottom: 50px;
+            border-left: 12px solid var(--primary);
+            padding-left: 30px;
+        }
+
+        h3 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        p, li {
+            font-size: 1.6rem;
+            color: #444;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        ul { list-style: none; padding: 0; }
+        li { position: relative; padding-left: 1.5em; }
+        li::before {
+            content: "\f054"; /* FontAwesome arrow */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: var(--primary);
+            position: absolute;
+            left: 0; top: 0.1em;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; height: 100%; align-items: center; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 50px; margin-top: 50px; }
+
+        .footer {
+            position: absolute; bottom: 40px; left: 120px; right: 120px;
+            display: flex; justify-content: space-between;
+            font-size: 1.2rem; color: #aaa; border-top: 2px solid #eee; padding-top: 20px;
+        }
+
+        .highlight { color: var(--primary); font-weight: 700; }
+        .accent { color: var(--accent); font-weight: 700; }
+
+        /* 图标盒子 */
+        .icon-box {
+            text-align: center; background: white; padding: 50px 30px;
+            border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .icon-box i { font-size: 5rem; margin-bottom: 30px; display: block; }
+
+        /* 流程箭头 */
+        .arrow-next { display: flex; align-items: center; justify-content: center; font-size: 4rem; color: #ddd; }
+
+    </style>
+</head>
+<body>
+
+    <div id="slide-container">
+        <div class="bg-gradient"></div>
+
+        <!-- ================= PAGE 1: 封面 ================= -->
+        <div class="slide active" style="justify-content: center; text-align: center;">
+            <div style="margin-bottom: 60px;">
+                <i class="fas fa-dove" style="font-size: 9rem; color: var(--primary); margin-bottom: 40px;"></i>
+                <h1>Spring Chasers</h1>
+                <div style="font-size: 2.8rem; color: #666; margin-top: 20px; font-weight: 300;">
+                    Tracking the Warmth: A Migration Visualization
+                </div>
+                <div style="font-size: 1.5rem; color: #999; margin-top: 20px; font-family: monospace;">
+                    treejr33.github.io/ChasingSpring
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: center; gap: 100px; margin-top: 80px;">
+                <div class="glass-card" style="min-width: 400px;">
+                    <strong style="color: var(--secondary); font-size: 2.2rem;">Ren Jianpeng</strong><br>
+                    <span style="color: var(--primary); font-size: 1.5rem; font-weight: 600;">Technical Lead</span>
+                </div>
+                <div class="glass-card" style="min-width: 400px;">
+                    <strong style="color: var(--secondary); font-size: 2.2rem;">Zhang Kaixiang</strong><br>
+                    <span style="color: var(--primary); font-size: 1.5rem; font-weight: 600;">Narrative Lead</span>
+                </div>
+            </div>
+            <div class="footer"><span>Introduction</span><span>1 / 8</span></div>
+        </div>
+
+        <!-- ================= PAGE 2: 背景 (基于网站 About) ================= -->
+        <div class="slide">
+            <h2>Context: The Rhythm of Life</h2>
+            <div class="grid-2">
+                <div>
+                    <ul>
+                        <li><strong>Chasing Isotherms:</strong> Migratory birds don't just fly north; they follow the <span class="highlight">5°C - 10°C isotherm</span> (the "Green Wave") for optimal resources.</li>
+                        <li><strong>Energy Balance:</strong> Migration is a precise calculation of energy. Birds must refuel at specific <span class="highlight">Wetland Stopovers</span>.</li>
+                        <li><strong>The Problem:</strong> What happens if these stopovers are destroyed? Habitat loss creates an "Energy Crisis" that breaks the migration chain.</li>
+                    </ul>
+                </div>
+                <div class="glass-card" style="text-align: center; height: 600px; display: flex; flex-direction: column; justify-content: center;">
+                    <h3 style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 40px;">"The Energy Gamble"</h3>
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 40px;">
+                        <div style="text-align: center;">
+                            <i class="fas fa-battery-full" style="font-size: 6rem; color: var(--primary);"></i>
+                            <p>Refuel</p>
+                        </div>
+                        <div style="font-size: 4rem; color: #ccc;">vs</div>
+                        <div style="text-align: center;">
+                            <i class="fas fa-battery-empty" style="font-size: 6rem; color: var(--accent);"></i>
+                            <p>Deplete</p>
+                        </div>
+                    </div>
+                    <p style="font-size: 1.5rem; margin-top: 30px;">
+                        Without stopovers, energy reaches 0 before the destination.
+                    </p>
+                </div>
+            </div>
+            <div class="footer"><span>Research Background</span><span>2 / 8</span></div>
+        </div>
+
+        <!-- ================= PAGE 3: 研究问题与目标 ================= -->
+        <div class="slide">
+            <h2>Research Question & Objectives</h2>
+            
+            <div class="glass-card" style="background: var(--secondary); margin-bottom: 80px; border: none; padding: 60px;">
+                <p style="font-size: 2.8rem; color: white; text-align: center; margin: 0; font-family: serif; font-style: italic; line-height: 1.4;">
+                    "How does habitat availability and energy consumption determine the survival of migratory birds?"
+                </p>
+            </div>
+
+            <div class="grid-3">
+                <div class="icon-box">
+                    <i class="fas fa-map-location-dot" style="color: var(--primary);"></i>
+                    <h3>1. Visualize</h3>
+                    <p>Map 3 major flyways (East, Mid, West) with real-time tracking logic tracking the 5°C line.</p>
+                </div>
+                <div class="icon-box">
+                    <i class="fas fa-chart-line" style="color: #f39c12;"></i>
+                    <h3>2. Analyze</h3>
+                    <p>Provide a "Data Cockpit" to compare flight distance, elevation profile, and latitude.</p>
+                </div>
+                <div class="icon-box">
+                    <i class="fas fa-heart-pulse" style="color: var(--accent);"></i>
+                    <h3>3. Gamify</h3>
+                    <p>Implement a "Survival Mode" where users can simulate wetland destruction.</p>
+                </div>
+            </div>
+            <div class="footer"><span>Objectives</span><span>3 / 8</span></div>
+        </div>
+
+        <!-- ================= PAGE 4: 数据来源与技术 (自圆其说) ================= -->
+        <div class="slide">
+            <h2>Data & Methodology</h2>
+            
+            <div style="display: flex; justify-content: space-between; align-items: stretch; gap: 40px; margin-top: 60px; height: 500px;">
+                <!-- Data Source -->
+                <div class="glass-card" style="flex: 1; text-align: center;">
+                    <h3 style="color: var(--secondary); margin-bottom: 40px;">DATA SOURCES</h3>
+                    <div style="text-align: left;">
+                        <p><i class="fas fa-database"></i> <strong>Biological Data:</strong> Simulated monthly coordinates based on scientific tracking records of <em>Red-crowned Cranes</em> and <em>Bar-headed Geese</em>.</p>
+                        <p><i class="fas fa-cloud"></i> <strong>Climate Data:</strong> Historical monthly average temperature tiles (TileLayer).</p>
+                    </div>
+                </div>
+
+                <div class="arrow-next"><i class="fas fa-chevron-right"></i></div>
+
+                <!-- Tech Stack -->
+                <div class="glass-card" style="flex: 1; text-align: center; border: 4px solid var(--primary);">
+                    <h3 style="color: var(--primary); margin-bottom: 40px;">TECH STACK</h3>
+                    <div style="text-align: left;">
+                        <p><strong>Leaflet.js:</strong> Base map rendering & TileLayers.</p>
+                        <p><strong>Turf.js:</strong> Real-time geospatial calculation (Distance, Bearing) between points.</p>
+                        <p><strong>ECharts:</strong> Dynamic charts linked to map interactions.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer"><span>Methodology</span><span>4 / 8</span></div>
+        </div>
+
+        <!-- ================= PAGE 5: 演示过渡 ================= -->
+        <div class="slide active" style="background-color: var(--primary); justify-content: center; text-align: center;">
+            <i class="fas fa-laptop-code" style="font-size: 12rem; color: white; margin-bottom: 50px; opacity: 0.9;"></i>
+            <h1 style="color: white; font-size: 8rem; margin-bottom: 30px;">Live Demo</h1>
+            <p style="color: rgba(255,255,255,0.95); font-size: 3rem;">Switching to Browser...</p>
+            <div class="footer" style="color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.3);"><span>Demonstration</span><span>5 / 8</span></div>
+        </div>
+
+        <!-- ================= PAGE 6: 关键发现 ================= -->
+        <div class="slide">
+            <h2>Key Findings & Results</h2>
+            <div class="grid-3">
+                
+                <div class="glass-card">
+                    <h3>Isotherm Dependency</h3>
+                    <p>Visual analysis confirms birds move north strictly within the <strong>5-10°C zone</strong>. They track the "Green Wave" of spring resources.</p>
+                </div>
+
+                <div class="glass-card">
+                    <h3>The "West" Challenge</h3>
+                    <p><strong>Bar-headed Geese</strong> show extreme elevation gain crossing the Himalayas (8000m+). This requires maximum energy efficiency.</p>
+                </div>
+
+                <div class="glass-card" style="border: 3px solid var(--accent); background: rgba(167, 29, 42, 0.05);">
+                    <h3 style="color: var(--accent);">Survival Mode</h3>
+                    <p>Simulating the destruction of a key node (e.g., Yellow River Delta) leads to <strong>Energy Depletion (0%)</strong> before arrival.</p>
+                </div>
+
+            </div>
+            <div class="footer"><span>Conclusion</span><span>6 / 8</span></div>
+        </div>
+
+        <!-- ================= PAGE 7: 意义与反思 ================= -->
+        <div class="slide">
+            <h2>Significance & Reflection</h2>
+            <div class="grid-2">
+                <div class="glass-card">
+                    <h3><i class="fas fa-lightbulb"></i> Social Significance</h3>
+                    <ul>
+                        <li><strong>Gamification:</strong> Transforming abstract data into a "Survival Game" evokes stronger empathy for bird conservation.</li>
+                        <li><strong>Policy Insight:</strong> Protecting <em>stopovers</em> is as critical as protecting breeding grounds.</li>
+                    </ul>
+                </div>
+                <div class="glass-card">
+                    <h3><i class="fas fa-code"></i> Technical Reflection</h3>
+                    <ul>
+                        <li><strong>Challenge:</strong> Simulating "Energy Decay" logic based on real-time distance was mathematically complex.</li>
+                        <li><strong>Future Work:</strong> Integrate Real-time Weather API for live temperature data.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer"><span>Reflection</span><span>7 / 8</span></div>
+        </div>
+
+        <!-- ================= PAGE 8: 结尾 ================= -->
+        <div class="slide" style="justify-content: center; text-align: center;">
+            <h1 style="font-size: 8rem; margin-bottom: 30px;">Thank You</h1>
+            <h3 style="font-size: 3.5rem; color: #777; margin-bottom: 80px; font-weight: 300;">Q & A</h3>
+            
+            <div style="font-size: 2.5rem; color: var(--secondary); font-family: serif; font-style: italic;">
+                "Protect the Stopovers, Save the Journey."
+            </div>
+
+            <div style="margin-top: 100px; display: flex; justify-content: center; gap: 80px;">
+                <div style="text-align: center; opacity: 0.8;">
+                    <i class="fab fa-github" style="font-size: 5rem; color: var(--secondary);"></i>
+                    <p style="font-size: 1.5rem; margin-top: 20px;">View Code</p>
+                </div>
+                <div style="text-align: center; opacity: 0.8;">
+                    <i class="fas fa-globe" style="font-size: 5rem; color: var(--primary);"></i>
+                    <p style="font-size: 1.5rem; margin-top: 20px;">Live Site</p>
+                </div>
+            </div>
+            
+            <div class="footer"><span>End</span><span>8 / 8</span></div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 核心控制逻辑 ---
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const deck = document.getElementById('slide-container');
+
+        // 1. 强制缩放：确保 1920x1080 的内容适配任意屏幕
+        function resizeDeck() {
+            // 获取窗口宽高
+            const windowW = window.innerWidth;
+            const windowH = window.innerHeight;
+            
+            // 计算缩放比例 (保持比例适配)
+            const scale = Math.min(windowW / 1920, windowH / 1080);
+            
+            // 应用变换：居中 + 缩放
+            // 这里的 translate 配合 body 的 flex center 实现完美居中
+            // 重点：transform-origin 已经在 CSS 中设为 center center
+            deck.style.transform = `scale(${scale})`;
+        }
+
+        // 监听窗口大小变化
+        window.addEventListener('resize', resizeDeck);
+        // 初始化
+        setTimeout(resizeDeck, 50);
+
+        // 2. 翻页逻辑
+        function showSlide(n) {
+            if (n >= slides.length) n = slides.length - 1;
+            if (n < 0) n = 0;
+            
+            slides.forEach((slide, index) => {
+                if (index === n) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            currentSlide = n;
+        }
+
+        // 键盘事件
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+                showSlide(currentSlide + 1);
+            } else if (e.key === 'ArrowLeft') {
+                showSlide(currentSlide - 1);
+            }
+        });
+
+        // 鼠标点击事件
+        document.addEventListener('click', (e) => {
+            if (e.clientX > window.innerWidth / 2) {
+                showSlide(currentSlide + 1);
+            } else {
+                showSlide(currentSlide - 1);
+            }
+        });
+
+    </script>
+</body>
+</html>
